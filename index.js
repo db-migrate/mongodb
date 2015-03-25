@@ -5,13 +5,14 @@ var Server = require('mongodb').Server;
 var Base = require('db-migrate-base');
 var log = global.mod.log;
 var type = global.mod.type;
+var Promise = require('bluebird');
 
 var connectionString;
 
 var MongodbDriver = Base.extend({
 
   init: function(connection, mongoString) {
-    this._super();
+    this._super(internals);
     this.connection = connection;
     connectionString = mongoString;
   },
@@ -22,13 +23,30 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   _createMigrationsCollection: function(callback) {
-    this._run('createCollection', global.migrationTable, null, callback);
+    this._run('createCollection', internals.migrationTable, null, callback);
+  },
+
+
+  /**
+   * Creates the seeder collection
+   *
+   * @param callback
+   */
+  _createSeedsCollection: function(callback) {
+    this._run('createCollection', internals.seedsTable, null, callback);
   },
 
   /**
    * An alias for _createMigrationsCollection
    */
   createMigrationsTable: function(callback) {
+    this._createMigrationsCollection(callback);
+  },
+
+  /**
+   * An alias for _createSeederCollection
+   */
+  createSeedsTable: function(callback) {
     this._createMigrationsCollection(callback);
   },
 
@@ -173,7 +191,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   addMigrationRecord: function (name, callback) {
-    this._run('insert', global.migrationTable, {name: name, run_on: new Date}, callback);
+    this._run('insert', internals.migrationTable, {name: name, run_on: new Date}, callback);
   },
 
   /**
@@ -216,10 +234,19 @@ var MongodbDriver = Base.extend({
    */
   _run: function(command, collection, options, callback) {
 
-    var args = this._makeParamArgs(arguments);
-    var callback = args[2];
+    var args = this._makeParamArgs(arguments),
+        sort = null,
+        callback = args[2];
+
     log.sql.apply(null, arguments);
-    if(global.dryRun) {
+
+    if(options && typeof(options) === 'object') {
+
+      if(options.sort)
+        sort = options.sort;
+    }
+
+    if(internals.dryRun) {
       return callback();
     }
 
@@ -244,7 +271,13 @@ var MongodbDriver = Base.extend({
       // Depending on the command, we need to use different mongo methods
       switch(command) {
         case 'find':
-          db.collection(collection)[command](options).toArray(callbackFunction);
+
+          if(sort) {
+            db.collection(collection)[command](options.query).sort(sort).toArray(callbackFunction);
+          }
+          else {
+            db.collection(collection)[command](options).toArray(callbackFunction);
+          }
           break;
         case 'renameCollection':
           db[command](collection, options.newCollection, callbackFunction);
@@ -257,11 +290,17 @@ var MongodbDriver = Base.extend({
           break;
         case 'insert':
           // options is the records to insert in this case
-          db.collection(collection)[command](options, {}, callbackFunction);
+          if(util.isArray(options))
+            db.collection(collection).insertMany(options, {}, callbackFunction);
+          else
+            db.collection(collection).insertOne(options, {}, callbackFunction);
           break;
         case 'remove':
           // options is the records to insert in this case
-          db.collection(collection)[command]({name:options.toRemove}, callbackFunction);
+          if(util.isArray(options))
+            db.collection(collection).deleteMany(options, callbackFunction);
+          else
+            db.collection(collection).deleteOne(options, callbackFunction);
           break;
         case 'collections':
           db.collections(callbackFunction);
@@ -308,7 +347,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   allLoadedMigrations: function(callback) {
-    this._run('find', global.migrationTable, null, callback);
+    this._run('find', internals.migrationTable, { sort: { run_on: -1 } }, callback);
   },
 
   /**
@@ -318,7 +357,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   deleteMigration: function(migrationName, callback) {
-    this._run('remove', global.migrationTable, {toRemove: migrationName}, callback);
+    this._run('remove', internals.migrationTable, {name: migrationName}, callback);
   },
 
   /**
@@ -335,10 +374,12 @@ var MongodbDriver = Base.extend({
  * @param config    - The config to connect to mongo
  * @param callback  - The callback to call with a MongodbDriver object
  */
-exports.connect = function(config, callback) {
+exports.connect = function(config, intern, callback) {
   var db;
   var port;
   var host;
+
+  internals = intern;
 
   // Make sure the database is defined
   if(config.database === undefined) {
@@ -357,7 +398,13 @@ exports.connect = function(config, callback) {
     port = config.port;
   }
 
-  var mongoString = 'mongodb://' + host + ':' + port + '/' + config.database;
+  var mongoString = 'mongodb://';
+
+  if(config.user !== undefined && config.password !== undefined) {
+    mongoString += config.user + ':' + config.password + '@';
+  }
+
+  mongoString += host + ':' + port + '/' + config.database;
 
   db = config.db || new MongoClient(new Server(host, port));
   callback(null, new MongodbDriver(db, mongoString));
