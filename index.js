@@ -169,7 +169,7 @@ var MongodbDriver = Base.extend({
    * @param collectionName  - The collection to add the index to
    * @param indexName       - The name of the index to add
    * @param columns         - The columns to add an index on
-   * @param unique          - A boolean whether this creates a unique index
+   * @param	unique          - A boolean whether this creates a unique index
    */
   addIndex: function(collectionName, indexName, columns, unique, callback) {
 
@@ -438,6 +438,16 @@ var MongodbDriver = Base.extend({
 
       this.connection.close(cb);
     }.bind(this)).nodeify(callback);
+  },
+
+  buildWhereClause: function() {
+
+    return Promise.reject('There is no NoSQL implementation yet!');
+  },
+
+  update: function() {
+
+    return Promise.reject('There is no NoSQL implementation yet!');
   }
 });
 
