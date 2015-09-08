@@ -4,8 +4,8 @@ var MongoClient = require('mongodb').MongoClient;
 var Server = require('mongodb').Server;
 var Base = require('db-migrate-base');
 var Promise = require('bluebird');
-var log = global.mod.log;
-var type = global.mod.type;
+var log;
+var type;
 
 var connectionString, internals = {};
 
@@ -465,6 +465,9 @@ exports.connect = function(config, intern, callback) {
   var host;
 
   internals = intern;
+
+  log = internals.mod.log;
+  type = internals.mod.type;
 
   // Make sure the database is defined
   if(config.database === undefined) {
