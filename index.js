@@ -7,14 +7,12 @@ var Promise = require('bluebird');
 var log;
 var type;
 
-var connectionString, internals = {};
-
 var MongodbDriver = Base.extend({
 
-  init: function(connection, mongoString) {
+  init: function(connection, internals, mongoString) {
     this._super(internals);
     this.connection = connection;
-    connectionString = mongoString;
+    this.connectionString = mongoString;
   },
 
   /**
@@ -23,7 +21,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   _createMigrationsCollection: function(callback) {
-    return this._run('createCollection', internals.migrationTable, null)
+    return this._run('createCollection', this.internals.migrationTable, null)
       .nodeify(callback);
   },
 
@@ -34,18 +32,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   _createSeedsCollection: function(callback) {
-    return this._run('createCollection', internals.seedTable, null)
-      .nodeify(callback);
-  },
-
-
-  /**
-   * Creates the seeder collection
-   *
-   * @param callback
-   */
-  _createSeedsCollection: function(callback) {
-    return this._run('createCollection', internals.seedTable, null)
+    return this._run('createCollection', this.internals.seedTable, null)
       .nodeify(callback);
   },
 
@@ -214,7 +201,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   addMigrationRecord: function (name, callback) {
-    return this._run('insert', internals.migrationTable, {name: name, run_on: new Date})
+    return this._run('insert', this.internals.migrationTable, {name: name, run_on: new Date()})
       .nodeify(callback);
   },
 
@@ -225,7 +212,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   addSeedRecord: function (name, callback) {
-    return this._run('insert', internals.seedTable, {name: name, run_on: new Date})
+    return this._run('insert', this.internals.seedTable, {name: name, run_on: new Date()})
       .nodeify(callback);
   },
 
@@ -284,7 +271,7 @@ var MongodbDriver = Base.extend({
         sort = options.sort;
     }
 
-    if(internals.dryRun) {
+    if(this.internals.dryRun) {
       return Promise.resolve().nodeify(callback);
     }
 
@@ -294,7 +281,7 @@ var MongodbDriver = Base.extend({
       };
 
       // Get a connection to mongo
-      this.connection.connect(connectionString, function(err, db) {
+      this.connection.connect(this.connectionString, function(err, db) {
 
         if(err) {
           prCB(err);
@@ -391,7 +378,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   allLoadedMigrations: function(callback) {
-    return this._run('find', internals.migrationTable, { sort: { run_on: -1 } })
+    return this._run('find', this.internals.migrationTable, { sort: { run_on: -1 } })
       .nodeify(callback);
   },
 
@@ -401,7 +388,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   allLoadedSeeds: function(callback) {
-    return this._run('find', internals.seedTable, { sort: { run_on: -1 } })
+    return this._run('find', this.internals.seedTable, { sort: { run_on: -1 } })
       .nodeify(callback);
   },
 
@@ -412,7 +399,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   deleteMigration: function(migrationName, callback) {
-    return this._run('remove', internals.migrationTable, {name: migrationName})
+    return this._run('remove', this.internals.migrationTable, {name: migrationName})
       .nodeify(callback);
   },
 
@@ -423,7 +410,7 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   deleteSeed: function(migrationName, callback) {
-    return this._run('remove', internals.seedTable, {name: migrationName})
+    return this._run('remove', this.internals.seedTable, {name: migrationName})
       .nodeify(callback);
   },
 
@@ -431,13 +418,7 @@ var MongodbDriver = Base.extend({
    * Closes the connection to mongodb
    */
   close: function(callback) {
-    return new Promise(function(resolve, reject) {
-      var cb = (function(err, data) {
-        return (err ? reject(err) : resolve(data));
-      });
-
-      this.connection.close(cb);
-    }.bind(this)).nodeify(callback);
+    return Promise.resolve().nodeify(callback);
   },
 
   buildWhereClause: function() {
@@ -464,7 +445,7 @@ exports.connect = function(config, intern, callback) {
   var port;
   var host;
 
-  internals = intern;
+  var internals = intern;
 
   log = internals.mod.log;
   type = internals.mod.type;
@@ -495,5 +476,5 @@ exports.connect = function(config, intern, callback) {
   mongoString += host + ':' + port + '/' + config.database;
 
   db = config.db || new MongoClient(new Server(host, port));
-  callback(null, new MongodbDriver(db, mongoString));
+  callback(null, new MongodbDriver(db, intern, mongoString));
 };
