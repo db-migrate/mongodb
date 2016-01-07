@@ -455,16 +455,30 @@ exports.connect = function(config, intern, callback) {
     throw new Error('database must be defined in database.json');
   }
 
-  if(config.host === undefined) {
-    host = 'localhost';
-  } else {
-    host = config.host;
-  }
-
   if(config.port === undefined) {
     port = 27017;
   } else {
     port = config.port;
+  }
+
+  if(config.host === undefined) {
+
+    host = 'localhost' + ':' + port;
+  } else if(util.isArray(config.host) ) {
+
+    var length = config.host.length;
+    host = '';
+
+    for(var i = 0; i < length; ++i) {
+
+      host += config.host[i] + ((config.host[i].indexOf(':') === -1) ?
+        ':' + port : '') + ',';
+    }
+
+    host = host.substring(0, host.length - 1);
+  } else {
+
+    host = config.host + ':' + port;
   }
 
   var mongoString = 'mongodb://';
@@ -473,7 +487,7 @@ exports.connect = function(config, intern, callback) {
     mongoString += config.user + ':' + config.password + '@';
   }
 
-  mongoString += host + ':' + port + '/' + config.database;
+  mongoString += host + '/' + config.database;
 
   db = config.db || new MongoClient(new Server(host, port));
   callback(null, new MongodbDriver(db, intern, mongoString));
