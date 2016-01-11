@@ -434,6 +434,32 @@ var MongodbDriver = Base.extend({
 
 Promise.promisifyAll(MongodbDriver);
 
+function parseColonString( config, port, length ) {
+
+  var result = '';
+
+  for(var i = 0; i < length; ++i) {
+
+    result += config.host[i] + ((config.host[i].indexOf(':') === -1) ?
+      ':' + port : '') + ',';
+  }
+
+  return result.substring(0, result.length - 1);
+}
+
+function parseObjects( config, port, length ) {
+
+  var result = '';
+
+  for(var i = 0; i < length; ++i) {
+
+    result += config.host[i].host + ((!config.host[i].port) ?
+      ':' + port : config.host[i].port) + ',';
+  }
+
+  return result.substring(0, result.length - 1);
+}
+
 /**
  * Gets a connection to mongo
  *
@@ -461,6 +487,8 @@ exports.connect = function(config, intern, callback) {
     port = config.port;
   }
 
+  config.host = util.isArray(config.hosts) ? config.hosts : config.host;
+
   if(config.host === undefined) {
 
     host = 'localhost' + ':' + port;
@@ -469,13 +497,10 @@ exports.connect = function(config, intern, callback) {
     var length = config.host.length;
     host = '';
 
-    for(var i = 0; i < length; ++i) {
-
-      host += config.host[i] + ((config.host[i].indexOf(':') === -1) ?
-        ':' + port : '') + ',';
-    }
-
-    host = host.substring(0, host.length - 1);
+    if(typeof(config.host[0]) === 'string')
+      host = parseColonString(config, port, length);
+    else
+      host = parseObjects(config, port, length);
   } else {
 
     host = config.host + ':' + port;
