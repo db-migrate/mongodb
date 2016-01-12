@@ -454,7 +454,7 @@ function parseObjects( config, port, length ) {
   for(var i = 0; i < length; ++i) {
 
     result += config.host[i].host + ((!config.host[i].port) ?
-      ':' + port : config.host[i].port) + ',';
+      ':' + port : ':' + config.host[i].port) + ',';
   }
 
   return result.substring(0, result.length - 1);
