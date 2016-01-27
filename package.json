@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/db-migrate/mongodb",
   "dependencies": {
-    "bluebird": "^2.9.34",
-    "db-migrate-base": "^1.2.0",
+    "bluebird": "^3.1.1",
+    "db-migrate-base": "^1.2.4",
     "moment": "^2.10.6",
     "mongodb": "^2.0.42"
   }
