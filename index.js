@@ -514,6 +514,10 @@ exports.connect = function(config, intern, callback) {
 
   mongoString += host + '/' + config.database;
 
+  if(config.authdb !== undefined) {
+    mongoString += '/?authSource=' + config.authdb;
+  }
+
   db = config.db || new MongoClient(new Server(host, port));
   callback(null, new MongodbDriver(db, intern, mongoString));
 };
