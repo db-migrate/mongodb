@@ -514,7 +514,7 @@ exports.connect = function(config, intern, callback) {
 
   mongoString += host + '/' + config.database;
 
-  if(config.authSource !== undefined) {
+  if(config.authSource !== undefined && config.user !== undefined && config.password !== undefined) {
     mongoString += '/?authSource=' + config.authSource;
   }
 
