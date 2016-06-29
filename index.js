@@ -344,6 +344,9 @@ var MongodbDriver = Base.extend({
           case 'use':
             db.db(collection, callbackFunction);
             break;
+          case 'update':
+            db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
+            break;
           default:
             db[command](collection, callbackFunction);
             break;
