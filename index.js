@@ -517,6 +517,10 @@ exports.connect = function(config, intern, callback) {
 
   mongoString += host + '/' + config.database;
 
+  if (config.ssl) {
+    mongoString += '?ssl=true';
+  }
+
   db = config.db || new MongoClient(new Server(host, port));
   callback(null, new MongodbDriver(db, intern, mongoString));
 };
