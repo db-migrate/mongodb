@@ -5,7 +5,7 @@ var dataType = require('db-migrate-shared').dataType;
 var driver = require('../');
 var log = require('db-migrate-shared').log;
 
-var config = require('../db.config.json').mongodb;
+var config = require('./db.config.json').mongodb;
 
 var internals = {};
 internals.mod = {
