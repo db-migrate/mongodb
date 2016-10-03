@@ -122,7 +122,7 @@ vows.describe('mongodb').addBatch({
           return this.callback(err);
         }
 
-        db.addIndex('event', 'event_title', 'title', false, this.callback);
+        db.addIndex('event', { name: 'event_title', columns: 'title', unique: false, sparse: true }, this.callback);
       }.bind(this));
     },
 
@@ -230,7 +230,7 @@ vows.describe('mongodb').addBatch({
           return this.callback(err);
         }
 
-        db.addIndex('event', 'event_title', 'title', false, function(err, data) {
+        db.addIndex('event', { name: 'event_title', columns: 'title', unique: false }, function(err, data) {
 
           if(err) {
             return this.callback(err);
@@ -299,7 +299,7 @@ vows.describe('mongodb').addBatch({
           return this.callback(err);
         }
 
-        db.addIndex('event', 'event_title', 'title', false, function(err, data) {
+        db.addIndex('event', { name: 'event_title', columns: 'title', unique: false }, function(err, data) {
 
           if(err) {
             return this.callback(err);
