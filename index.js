@@ -159,14 +159,24 @@ var MongodbDriver = Base.extend({
    * @param	unique          - A boolean whether this creates a unique index
    */
   addIndex: function(collectionName, indexOptions, callback) {
-
-    var options = {
-      name: indexOptions.name,
-      columns: indexOptions.columns,
-      unique: indexOptions.unique
-    };
-    if (indexOptions.hasOwnProperty('sparse')) {
-      options.sparse = indexOptions.sparse
+    var options = {};
+    if (indexOptions.constructor.name == 'Object') {
+      options = {
+        name: indexOptions.name,
+        columns: indexOptions.columns,
+        unique: indexOptions.unique
+      };
+      if (indexOptions.hasOwnProperty('sparse')) {
+        options.sparse = indexOptions.sparse
+      }
+    } else {
+      log.warn('addIndex can now accept Object for passing index Options.');
+      options = {
+        name: arguments[1],
+        columns: arguments[2],
+        unique: arguments[3]
+      };
+      callback = arguments[4];
     }
 
     return this._run('createIndex', collectionName, options)
