@@ -154,9 +154,8 @@ var MongodbDriver = Base.extend({
    * Adds an index to a collection
    *
    * @param collectionName  - The collection to add the index to
-   * @param indexName       - The name of the index to add
-   * @param columns         - The columns to add an index on
-   * @param	unique          - A boolean whether this creates a unique index
+   * @param indexOptions    - An object of options to be used as Index options
+   * @param callback
    */
   addIndex: function(collectionName, indexOptions, callback) {
     var options = {};
