@@ -159,14 +159,14 @@ var MongodbDriver = Base.extend({
    */
   addIndex: function(collectionName, indexOptions, callback) {
     var options = {};
-    if (indexOptions.constructor.name == 'Object') {
+    if (indexOptions.constructor.name === 'Object') {
       options = {
         name: indexOptions.name,
         columns: indexOptions.columns,
         unique: indexOptions.unique
       };
       if (indexOptions.hasOwnProperty('sparse')) {
-        options.sparse = indexOptions.sparse
+        options.sparse = indexOptions.sparse;
       }
     } else {
       log.warn('addIndex can now accept Object for passing index Options.');
