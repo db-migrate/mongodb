@@ -169,7 +169,6 @@ var MongodbDriver = Base.extend({
         options.sparse = indexOptions.sparse;
       }
     } else {
-      log.warn('addIndex can now accept Object for passing index Options.');
       options = {
         name: arguments[1],
         columns: arguments[2],
