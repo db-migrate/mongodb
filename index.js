@@ -517,9 +517,17 @@ exports.connect = function(config, intern, callback) {
 
   mongoString += host + '/' + config.database;
 
+  extraParams = [];
   if (config.ssl) {
-    mongoString += '?ssl=true';
+    extraParams.push('ssl=true');
   }
+  if (config.replicaSet){
+    extraParams.push('replicaSet=' + config.replicaSet);
+  }
+  if(extraParams.length > 0){
+      mongoString += '?' + extraParams.join('&');
+  }
+
 
   db = config.db || new MongoClient(new Server(host, port));
   callback(null, new MongodbDriver(db, intern, mongoString));
