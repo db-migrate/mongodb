@@ -521,9 +521,15 @@ exports.connect = function(config, intern, callback) {
   if (config.ssl) {
     extraParams.push('ssl=true');
   }
+
+  if(config.authSource !== undefined && config.user !== undefined && config.password !== undefined) {
+    extraParams.push('?authSource=' + config.authSource);
+  }
+
   if (config.replicaSet){
     extraParams.push('replicaSet=' + config.replicaSet);
   }
+
   if(extraParams.length > 0){
       mongoString += '?' + extraParams.join('&');
   }
