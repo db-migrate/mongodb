@@ -523,7 +523,7 @@ exports.connect = function(config, intern, callback) {
   }
 
   if(config.authSource !== undefined && config.user !== undefined && config.password !== undefined) {
-    extraParams.push('?authSource=' + config.authSource);
+    extraParams.push('authSource=' + config.authSource);
   }
 
   if (config.replicaSet){
