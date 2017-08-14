@@ -66,16 +66,14 @@ var MongodbDriver = Base.extend({
     if(typeof(options) === 'object')
     {
       if(typeof(options.database) === 'string')
-        return this._run('use', options, null)
-          .nodeify(callback);
+        this._database = options.database;
     }
     else if(typeof(options) === 'string')
     {
-      return this._run('use', options, null)
-        .nodeify(callback);
+      this._database = options;
     }
-    else
-      return Promise.resolve().nodeify(callback);
+
+    return Promise.resolve().nodeify(callback);
   },
 
   createDatabase: function(dbName, options, callback) {
@@ -340,9 +338,6 @@ var MongodbDriver = Base.extend({
             break;
           case 'dropDatabase':
             db.dropDatabase(callbackFunction);
-            break;
-          case 'use':
-            db.db(collection, callbackFunction);
             break;
           case 'update':
             db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
