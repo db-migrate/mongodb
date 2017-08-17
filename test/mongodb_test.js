@@ -122,7 +122,7 @@ vows.describe('mongodb').addBatch({
           return this.callback(err);
         }
 
-        db.addIndex('event', 'event_title', 'title', false, this.callback);
+        db.addIndex('event', { name: 'event_title', columns: 'title', unique: false, sparse: true }, this.callback);
       }.bind(this));
     },
 
@@ -230,7 +230,7 @@ vows.describe('mongodb').addBatch({
           return this.callback(err);
         }
 
-        db.addIndex('event', 'event_title', 'title', false, function(err, data) {
+        db.addIndex('event', { name: 'event_title', columns: 'title', unique: false }, function(err, data) {
 
           if(err) {
             return this.callback(err);
@@ -299,7 +299,7 @@ vows.describe('mongodb').addBatch({
           return this.callback(err);
         }
 
-        db.addIndex('event', 'event_title', 'title', false, function(err, data) {
+        db.addIndex('event', { name: 'event_title', columns: 'title', unique: false }, function(err, data) {
 
           if(err) {
             return this.callback(err);
@@ -360,4 +360,51 @@ vows.describe('mongodb').addBatch({
       }
     }
   }
-}).export(module);
+})
+.addBatch({
+  'addIndex-backward-compatibility': {
+    topic: function() {
+      db.createCollection('event', function(err, collection) {
+        if(err) {
+          return this.callback(err);
+        }
+
+        db.addIndex('event', 'event_title','title', false, this.callback);
+      }.bind(this));
+    },
+
+    teardown: function() {
+      db.dropCollection('event', this.callback);
+    },
+
+    'preserves case': {
+      topic: function() {
+        db._getCollectionNames(this.callback);
+      },
+
+      'of the functions original table': function(err, tables) {
+        var index = 0;
+        assert.isNotNull(tables);
+        assert.equal(tables.length, 2); // Should be 2 b/c of the system collection
+
+        if( tables[0].collectionName === 'system.indexes' )
+          index = 1;
+
+        assert.equal(tables[index].collectionName, 'event');
+      }
+    },
+
+    'has resulting index metadata': {
+      topic: function() {
+        db._getIndexes('event', this.callback);
+      },
+
+      'with additional index': function(err, indexes) {
+        assert.isDefined(indexes);
+        assert.isNotNull(indexes);
+        assert.include(indexes, 'event_title');
+      }
+    }
+  }
+})
+.export(module);

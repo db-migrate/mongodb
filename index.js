@@ -152,17 +152,28 @@ var MongodbDriver = Base.extend({
    * Adds an index to a collection
    *
    * @param collectionName  - The collection to add the index to
-   * @param indexName       - The name of the index to add
-   * @param columns         - The columns to add an index on
-   * @param	unique          - A boolean whether this creates a unique index
+   * @param indexOptions    - An object of options to be used as Index options
+   * @param callback
    */
-  addIndex: function(collectionName, indexName, columns, unique, callback) {
-
-    var options = {
-      indexName: indexName,
-      columns: columns,
-      unique: unique
-    };
+  addIndex: function(collectionName, indexOptions, callback) {
+    var options = {};
+    if (indexOptions.constructor.name === 'Object') {
+      options = {
+        name: indexOptions.name,
+        columns: indexOptions.columns,
+        unique: indexOptions.unique
+      };
+      if (indexOptions.hasOwnProperty('sparse')) {
+        options.sparse = indexOptions.sparse;
+      }
+    } else {
+      options = {
+        name: arguments[1],
+        columns: arguments[2],
+        unique: arguments[3]
+      };
+      callback = arguments[4];
+    }
 
     return this._run('createIndex', collectionName, options)
       .nodeify(callback);
@@ -311,7 +322,7 @@ var MongodbDriver = Base.extend({
             db[command](collection, options.newCollection, callbackFunction);
             break;
           case 'createIndex':
-            db[command](collection, options.columns, {name: options.indexName, unique: options.unique}, callbackFunction);
+            db[command](collection, options.columns, options, callbackFunction);
             break;
           case 'dropIndex':
             db.collection(collection)[command](options.indexName, callbackFunction);
