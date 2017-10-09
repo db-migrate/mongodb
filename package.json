@@ -1,6 +1,6 @@
 {
-  "name": "db-migrate-mongodb",
-  "version": "1.2.3",
+  "name": "borntraegermarc-db-migrate-mongodb",
+  "version": "1.2.4",
   "description": "mongodb driver for db-migrate",
   "main": "index.js",
   "scripts": {
