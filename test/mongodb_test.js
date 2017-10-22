@@ -360,4 +360,47 @@ vows.describe('mongodb').addBatch({
       }
     }
   }
-}).export(module);
+})
+.addBatch({
+  'updateMany': {
+    topic: function() {
+      db.createCollection('event', function(err, collection) {
+        if(err) {
+          return this.callback(err);
+        }
+        db.insert('event', {id: 2, title: 'title'}, function(err) {
+            if(err) {
+              return this.callback(err);
+            }
+
+            var command = 'updateMany';
+            var renameFieldOptions = {
+                query: {},
+                update: {
+                    $rename: {
+                      title: 'titleUpdated'
+                    }
+                },
+                options: {}
+            };
+        
+            db._run(command, 'event', renameFieldOptions, function (err) {
+              if(err) {
+                return this.callback(err);
+              }
+              db._find('event', {titleUpdated: 'title'}, this.callback);
+            }.bind(this));        
+        }.bind(this));
+      }.bind(this));
+    },
+
+    teardown: function() {
+      db.dropCollection('event', this.callback);
+    },
+
+    'with renamed row' : function(err, data) {
+      assert.equal(data.length, 1);
+    }
+  }
+})
+.export(module);
