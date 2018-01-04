@@ -468,4 +468,18 @@ vows
       }
     }
   })
+  .addBatch({
+    getDbInstance: {
+      topic: function() {
+        db.getDbInstance(this.callback);
+      },
+
+      teardown: function() {
+      },
+
+      "has database reference": function(err, db) {
+        assert.isNotNull(db);
+      }
+    }
+  })
   .export(module);

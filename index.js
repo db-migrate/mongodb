@@ -213,6 +213,16 @@ var MongodbDriver = Base.extend({
     return this._run('insert', this.internals.seedTable, {name: name, run_on: new Date()})
       .nodeify(callback);
   },
+  
+  /**
+   * Returns the DB instance so custom updates can be made
+   *
+   * @param callback
+   */
+  getDbInstance: function (callback) {
+    return this._run('getDbInstance', null, {run_on: new Date()})
+      .nodeify(callback);
+  },
 
   /**
    * Runs a query
@@ -344,6 +354,9 @@ var MongodbDriver = Base.extend({
             break;
           case 'updateMany':
             db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
+            break;
+          case 'getDbInstance':
+            callbackFunction(null, db);
             break;
           default:
             db[command](collection, callbackFunction);
