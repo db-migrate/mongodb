@@ -515,7 +515,7 @@ exports.connect = function(config, intern, callback) {
 
   mongoString += host + '/' + config.database;
 
-  extraParams = [];
+  var extraParams = [];
   if (config.ssl) {
     extraParams.push('ssl=true');
   }
