@@ -27,8 +27,8 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "db-migrate-base": "^1.3.3",
-    "moment": "^2.18.1",
-    "mongodb": "^2.2.29"
+    "moment": "^2.20.1",
+    "mongodb": "^2.2.34"
   },
   "devDependencies": {
     "db-meta": "^0.4.1",
