@@ -215,9 +215,11 @@ var MongodbDriver = Base.extend({
   },
   
   /**
-   * Returns the DB instance so custom updates can be made
+   * Returns the DB instance so custom updates can be made.
+   * NOTE: This method exceptionally does not call close() on the database driver when the promise resolves. So the getDbInstance method caller
+   * needs to call .close() on it's own after finish working with the database driver.
    *
-   * @param callback
+   * @param callback with the database driver as 2nd callback argument
    */
   getDbInstance: function (callback) {
     return this._run('getDbInstance', null, {run_on: new Date()})
@@ -303,7 +305,9 @@ var MongodbDriver = Base.extend({
           }
 
           prCB(null, data);
-          db.close();
+          if (command !== 'getDbInstance') {
+            db.close();
+          }
         };
 
         // Depending on the command, we need to use different mongo methods
