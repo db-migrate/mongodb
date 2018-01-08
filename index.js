@@ -213,6 +213,18 @@ var MongodbDriver = Base.extend({
     return this._run('insert', this.internals.seedTable, {name: name, run_on: new Date()})
       .nodeify(callback);
   },
+  
+  /**
+   * Returns the DB instance so custom updates can be made.
+   * NOTE: This method exceptionally does not call close() on the database driver when the promise resolves. So the getDbInstance method caller
+   * needs to call .close() on it's own after finish working with the database driver.
+   *
+   * @param callback with the database driver as 2nd callback argument
+   */
+  getDbInstance: function (callback) {
+    return this._run('getDbInstance', null, {run_on: new Date()})
+      .nodeify(callback);
+  },
 
   /**
    * Runs a query
@@ -344,6 +356,9 @@ var MongodbDriver = Base.extend({
             break;
           case 'updateMany':
             db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
+            break;
+          case 'getDbInstance':
+            prCB(null, db); // When the user wants to get the DB instance we need to return the promise callback, so the DB connection is not automatically closed
             break;
           default:
             db[command](collection, callbackFunction);
