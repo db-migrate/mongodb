@@ -358,7 +358,7 @@ var MongodbDriver = Base.extend({
             db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
             break;
           case 'getDbInstance':
-            prCB(null, db); // When the user wants to get the DB instance we need to retrun the promise callback, so the DB connection is not automatically closed
+            prCB(null, db); // When the user wants to get the DB instance we need to return the promise callback, so the DB connection is not automatically closed
             break;
           default:
             db[command](collection, callbackFunction);
