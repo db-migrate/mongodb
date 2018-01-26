@@ -493,11 +493,11 @@ exports.connect = function(config, intern, callback) {
   type = internals.mod.type;
 
   // Make sure the database is defined
-  if(config.database === undefined) {
+  if(!config.database) {
     throw new Error('database must be defined in database.json');
   }
 
-  if(config.port === undefined) {
+  if(!config.port) {
     port = 27017;
   } else {
     port = config.port;
@@ -505,7 +505,7 @@ exports.connect = function(config, intern, callback) {
 
   config.host = util.isArray(config.hosts) ? config.hosts : config.host;
 
-  if(config.host === undefined) {
+  if(!config.host) {
 
     host = 'localhost' + ':' + port;
   } else if(util.isArray(config.host) ) {
@@ -524,7 +524,7 @@ exports.connect = function(config, intern, callback) {
 
   var mongoString = 'mongodb://';
 
-  if(config.user !== undefined && config.password !== undefined) {
+  if(config.user && config.password) {
     mongoString += config.user + ':' + config.password + '@';
   }
 
@@ -535,7 +535,7 @@ exports.connect = function(config, intern, callback) {
     extraParams.push('ssl=true');
   }
 
-  if(config.authSource !== undefined && config.user !== undefined && config.password !== undefined) {
+  if(config.authSource && config.user && config.password) {
     extraParams.push('authSource=' + config.authSource);
   }
 
