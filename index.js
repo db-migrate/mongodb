@@ -181,6 +181,18 @@ var MongodbDriver = Base.extend({
   },
 
   /**
+   * Find records in a collection
+   *
+   * @param collectionName  - The collection to insert into
+   * @param where           - Where filter
+   * @param callback
+   */
+  find: function(collectionName, where, callback) {
+    return this._run('find', collectionName, where)
+      .nodeify(callback);
+  },
+
+  /**
    * Inserts a record(s) into a collection
    *
    * @param collectionName  - The collection to insert into
@@ -189,6 +201,32 @@ var MongodbDriver = Base.extend({
    */
   insert: function(collectionName, toInsert, callback) {
     return this._run('insert', collectionName, toInsert)
+      .nodeify(callback);
+  },
+
+
+  /**
+   * Removes a record from a collection
+   *
+   * @param collectionName  - The collection to insert into
+   * @param toInsert        - The record(s) to insert
+   * @param callback
+   */
+  remove: function(collectionName, toRemove, callback) {
+    return this._run('remove', collectionName, toRemove)
+      .nodeify(callback);
+  },
+
+
+  /**
+   * Removes records from a collection
+   *
+   * @param collectionName  - The collection to insert into
+   * @param toInsert        - The record(s) to insert
+   * @param callback
+   */
+  removeMany: function(collectionName, toRemove, callback) {
+    return this._run('removeMany', collectionName, toRemove)
       .nodeify(callback);
   },
 
@@ -301,7 +339,7 @@ var MongodbDriver = Base.extend({
         var callbackFunction = function(err, data) {
 
           if(err) {
-            prCB(err);
+            return prCB(err);
           }
 
           prCB(null, data);
@@ -338,9 +376,14 @@ var MongodbDriver = Base.extend({
           case 'remove':
             // options is the records to insert in this case
             if(util.isArray(options))
+              // TODO array is not a vlid input to deleteMany
               db.collection(collection).deleteMany(options, callbackFunction);
             else
               db.collection(collection).deleteOne(options, callbackFunction);
+            break;
+          case 'removeMany':
+            // options is the records to insert in this case
+            db.collection(collection).deleteMany(options, callbackFunction);
             break;
           case 'collections':
             db.collections(callbackFunction);
