@@ -339,7 +339,7 @@ var MongodbDriver = Base.extend({
         var callbackFunction = function(err, data) {
 
           if(err) {
-            prCB(err);
+            return prCB(err);
           }
 
           prCB(null, data);
