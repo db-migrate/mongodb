@@ -181,6 +181,18 @@ var MongodbDriver = Base.extend({
   },
 
   /**
+   * Find records in a collection
+   *
+   * @param collectionName  - The collection to insert into
+   * @param where           - Where filter
+   * @param callback
+   */
+  find: function(collectionName, where, callback) {
+    return this._run('find', collectionName, where)
+      .nodeify(callback);
+  },
+
+  /**
    * Inserts a record(s) into a collection
    *
    * @param collectionName  - The collection to insert into
