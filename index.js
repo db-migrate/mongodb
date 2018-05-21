@@ -21,7 +21,6 @@ var MongodbDriver = Base.extend({
    * @param callback
    */
   _createMigrationsCollection: function(callback) {
-    // console.log('_createMigrationsCollection');
     return this._run('createCollection', this.internals.migrationTable, null)
       .nodeify(callback);
   },
@@ -41,7 +40,6 @@ var MongodbDriver = Base.extend({
    * An alias for _createMigrationsCollection
    */
   createMigrationsTable: function(callback) {
-    // console.log('createMigrationsTable start');
     this._createMigrationsCollection(callback);
   },
 
@@ -270,7 +268,6 @@ var MongodbDriver = Base.extend({
    * @param callback    - A callback to return the results
    */
   _run: function(command, collection, options, callback) {
-    // console.log('_run', command, collection, options);
 
     var args = this._makeParamArgs(arguments),
         sort = null,
@@ -295,8 +292,6 @@ var MongodbDriver = Base.extend({
 
       // Get a connection to mongo
       this.connection.connect(this.connectionString, function(err, db) {
-        // console.log('err', err);
-        // console.log('db', db);
 
         if(err) {
           return prCB(err);
@@ -366,7 +361,6 @@ var MongodbDriver = Base.extend({
             prCB(null, db); // When the user wants to get the DB instance we need to return the promise callback, so the DB connection is not automatically closed
             break;
           default:
-            // console.log('db', db);
             // This should actually work but I think db is unexpectedly null
             db[command](collection, callbackFunction);
             break;
