@@ -361,7 +361,6 @@ var MongodbDriver = Base.extend({
             prCB(null, db); // When the user wants to get the DB instance we need to return the promise callback, so the DB connection is not automatically closed
             break;
           default:
-            // This should actually work but I think db is unexpectedly null
             db[command](collection, callbackFunction);
             break;
         }
