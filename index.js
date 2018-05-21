@@ -562,7 +562,4 @@ exports.connect = function(config, intern, callback) {
   }
 
   callback(null, new MongodbDriver(db, intern, mongoString));
-
-  // db = config.db || new MongoClient(new Server(host, port));
-  // callback(null, new MongodbDriver(db, intern, mongoString));
 };
