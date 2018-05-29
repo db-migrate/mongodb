@@ -294,7 +294,7 @@ var MongodbDriver = Base.extend({
       this.connection.connect(this.connectionString, function(err, db) {
 
         if(err) {
-          prCB(err);
+          return prCB(err);
         }
 
         // Callback function to return mongo records
@@ -543,11 +543,23 @@ exports.connect = function(config, intern, callback) {
     extraParams.push('replicaSet=' + config.replicaSet);
   }
 
+  if (config.readPreference){
+    extraParams.push('readPreference=' + config.readPreference);
+  }
+
   if(extraParams.length > 0){
       mongoString += '?' + extraParams.join('&');
   }
 
+  if (config.replSet) {
+    var hosts = config.replSet.split(',');
+    var servers = hosts.map(function(host) {
+      return new Server(host, port, config.options);
+    });
+    db = config.db || new MongoClient(new ReplSet(servers, config.options));
+  } else {
+    db = config.db || new MongoClient(new Server(host, port));
+  }
 
-  db = config.db || new MongoClient(new Server(host, port));
   callback(null, new MongodbDriver(db, intern, mongoString));
 };
