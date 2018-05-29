@@ -556,6 +556,7 @@ exports.connect = function(config, intern, callback) {
     var servers = hosts.map(function(host) {
       return new Server(host, port, config.options);
     });
+    console.log('config', config);
     db = config.db || new MongoClient(new ReplSet(servers, config.options));
   } else {
     db = config.db || new MongoClient(new Server(host, port));
