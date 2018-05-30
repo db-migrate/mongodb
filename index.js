@@ -551,13 +551,15 @@ exports.connect = function(config, intern, callback) {
       mongoString += '?' + extraParams.join('&');
   }
 
+  console.log('config', config);
+  console.log('extraParams', extraParams);
+  console.log('mongoString', mongoString);
   if (config.replSet) {
     var hosts = config.replSet.split(',');
     var servers = hosts.map(function(host) {
       return new Server(host, port, config.options);
     });
-    console.log('config', config);
-    db = config.db || new MongoClient(new ReplSet(servers, config.options));
+    db = config.db || new MongoCl:ent(new ReplSet(servers, config.options));
   } else {
     db = config.db || new MongoClient(new Server(host, port));
   }
