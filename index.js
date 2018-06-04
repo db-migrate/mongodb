@@ -2,6 +2,7 @@ var util = require('util');
 var moment = require('moment');
 var MongoClient = require('mongodb').MongoClient;
 var Server = require('mongodb').Server;
+var ReplSet = require('mongodb').ReplSet;
 var Base = require('db-migrate-base');
 var Promise = require('bluebird');
 var log;
@@ -483,6 +484,7 @@ function parseObjects( config, port, length ) {
  * @param callback  - The callback to call with a MongodbDriver object
  */
 exports.connect = function(config, intern, callback) {
+  console.log('mongo driver connect start');
   var db;
   var port;
   var host;
@@ -554,12 +556,16 @@ exports.connect = function(config, intern, callback) {
   console.log('config', config);
   console.log('extraParams', extraParams);
   console.log('mongoString', mongoString);
+  // Is it replSet or replicaSet? Used to be replSet, let's keep it as replSet
   if (config.replSet) {
     var hosts = config.replSet.split(',');
+    console.log('hosts', hosts);
     var servers = hosts.map(function(host) {
       return new Server(host, port, config.options);
     });
+    console.log('servers', servers);
     db = config.db || new MongoClient(new ReplSet(servers, config.options));
+    console.log('db', db);
   } else {
     db = config.db || new MongoClient(new Server(host, port));
   }
