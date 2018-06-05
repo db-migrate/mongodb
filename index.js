@@ -288,17 +288,12 @@ var MongodbDriver = Base.extend({
       return Promise.resolve().nodeify(callback);
     }
 
-    console.log('_run');
     return new Promise(function(resolve, reject) {
       var prCB = function(err, data) {
         return (err ? reject(err) : resolve(data));
       };
 
-      // Get a connection to mongo
-      console.log('this.connection', this.connection);
-      console.log('this.connectionString', this.connectionString);
       this.connection.connect(this.connectionString, this.options, function(err, db) {
-        console.log('this.connection.connect err', err);
 
         if(err) {
           return prCB(err);
@@ -490,7 +485,6 @@ function parseObjects( config, port, length ) {
  * @param callback  - The callback to call with a MongodbDriver object
  */
 exports.connect = function(config, intern, callback) {
-  console.log('mongo driver connect start 12345');
   var db;
   var port;
   var host;
@@ -560,48 +554,11 @@ exports.connect = function(config, intern, callback) {
       mongoString += '?' + extraParams.join('&');
   }
 
-  console.log('config', config);
-  console.log('extraParams', extraParams);
-  console.log('mongoString', mongoString);
-  console.log('config.db', config.db);
-
   if (config.options.sslCA) {
     config.options.sslCA = Buffer.from(config.options.sslCA);
   }
-  // The config options doesn't have all the stuff you need. The hell is with the pointless structure then?.
-  // Is it replSet or replicaSet? Used to be replSet, let's keep it as replSet
-  // if (config.replSet) {
-  //   var hosts = config.replSet.split(',');
-  //   var servers = hosts.map(function(host) {
-  //     return new Server(host, port, config.options);
-  //   });
-  //   // It's unclear that passing in a server/replset does anything at all
-  //   db = config.db || new MongoClient(new ReplSet(servers, config.options));
-  //   // console.log('db', db);
-  // } else {
-  //   // db = config.db || new MongoClient(new Server(host, port));
-  //   db = config.db || new MongoClient(new Server(host, port, config.options));
-  //   // MongoClient.connect(mongoString, config.options, function(err, res) {
-  //   //   console.log('err', err);
-  //   //   console.log('res', res);
-  //   // });
-  // }
+
   db = config.db || new MongoClient();
 
-  // This works too. The config.options are IMPORTANT. Having them in server just isn't good enough.
-  // const driver = new MongodbDriver(db, intern, mongoString);
-  // driver.connection.connect(mongoString, config.options, function(err, res) {
-  //   console.log('err', err);
-  //   console.log('res', res);
-  // });
-
-  // Where are we? driver.connection.connect works if you pass the config.options. It doesn't work if you don't.
-  // Basically, new mongoClient(new Server(host, port, config.options)) is insufficient to hold onto the options.
-  // What can we do about it?
-  // 1) debug why the server options thing doesn't hold em (this is being done correctly though, so that's not it)
-  // 2) figure out how to pass the options
-
-  // callback(null, driver);
-  // How does the sslCa get passed? It looks like it doesnt (in non-repl-set)
   callback(null, new MongodbDriver(db, intern, mongoString, config.options));
 };
