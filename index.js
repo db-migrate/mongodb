@@ -2,7 +2,6 @@ var util = require('util');
 var moment = require('moment');
 var MongoClient = require('mongodb').MongoClient;
 var Server = require('mongodb').Server;
-var ReplSet = require('mongodb').ReplSet;
 var Base = require('db-migrate-base');
 var Promise = require('bluebird');
 var log;
@@ -293,6 +292,7 @@ var MongodbDriver = Base.extend({
         return (err ? reject(err) : resolve(data));
       };
 
+      // Get a connection to mongo
       this.connection.connect(this.connectionString, this.options, function(err, db) {
 
         if(err) {
@@ -533,7 +533,6 @@ exports.connect = function(config, intern, callback) {
   mongoString += host + '/' + config.database;
 
   var extraParams = [];
-  
   if (config.ssl) {
     extraParams.push('ssl=true');
   }
