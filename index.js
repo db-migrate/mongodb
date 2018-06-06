@@ -6,13 +6,15 @@ var Base = require('db-migrate-base');
 var Promise = require('bluebird');
 var log;
 var type;
+var fs = require('fs');
 
 var MongodbDriver = Base.extend({
 
-  init: function(connection, internals, mongoString) {
+  init: function(connection, internals, mongoString, options) {
     this._super(internals);
     this.connection = connection;
     this.connectionString = mongoString;
+    this.options = options;
   },
 
   /**
@@ -291,10 +293,10 @@ var MongodbDriver = Base.extend({
       };
 
       // Get a connection to mongo
-      this.connection.connect(this.connectionString, function(err, db) {
+      this.connection.connect(this.connectionString, this.options, function(err, db) {
 
         if(err) {
-          prCB(err);
+          return prCB(err);
         }
 
         // Callback function to return mongo records
@@ -543,11 +545,19 @@ exports.connect = function(config, intern, callback) {
     extraParams.push('replicaSet=' + config.replicaSet);
   }
 
+  if (config.readPreference){
+    extraParams.push('readPreference=' + config.readPreference);
+  }
+
   if(extraParams.length > 0){
       mongoString += '?' + extraParams.join('&');
   }
 
+  if (config.options && config.options.sslCA) {
+    config.options.sslCA = Buffer.from(config.options.sslCA);
+  }
 
-  db = config.db || new MongoClient(new Server(host, port));
-  callback(null, new MongodbDriver(db, intern, mongoString));
+  db = config.db || new MongoClient();
+
+  callback(null, new MongodbDriver(db, intern, mongoString, config.options));
 };
