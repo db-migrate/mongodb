@@ -553,7 +553,7 @@ exports.connect = function(config, intern, callback) {
       mongoString += '?' + extraParams.join('&');
   }
 
-  if (config.options.sslCA) {
+  if (config.options && config.options.sslCA) {
     config.options.sslCA = Buffer.from(config.options.sslCA);
   }
 
