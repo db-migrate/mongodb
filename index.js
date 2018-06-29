@@ -158,13 +158,15 @@ var MongodbDriver = Base.extend({
    */
   addIndex: function(collectionName, indexName, columns, unique, callback) {
 
-    var options = {
-      indexName: indexName,
+    var parameters = {
       columns: columns,
-      unique: unique
+      options: {
+          indexName: indexName,
+          unique: unique
+      }
     };
 
-    return this._run('createIndex', collectionName, options)
+    return this._run('createIndex', collectionName, parameters)
       .nodeify(callback);
   },
 
@@ -213,7 +215,7 @@ var MongodbDriver = Base.extend({
     return this._run('insert', this.internals.seedTable, {name: name, run_on: new Date()})
       .nodeify(callback);
   },
-  
+
   /**
    * Returns the DB instance so custom updates can be made.
    * NOTE: This method exceptionally does not call close() on the database driver when the promise resolves. So the getDbInstance method caller
@@ -323,7 +325,7 @@ var MongodbDriver = Base.extend({
             db[command](collection, options.newCollection, callbackFunction);
             break;
           case 'createIndex':
-            db[command](collection, options.columns, {name: options.indexName, unique: options.unique}, callbackFunction);
+            db[command](collection, options.columns, options.options, callbackFunction);
             break;
           case 'dropIndex':
             db.collection(collection)[command](options.indexName, callbackFunction);
