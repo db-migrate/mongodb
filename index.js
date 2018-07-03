@@ -161,7 +161,7 @@ var MongodbDriver = Base.extend({
     var parameters = {
       columns: columns,
       options: {
-          indexName: indexName,
+          name: indexName,
           unique: unique
       }
     };
