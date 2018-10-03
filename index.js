@@ -1,5 +1,4 @@
 var util = require('util');
-var moment = require('moment');
 var MongoClient = require('mongodb').MongoClient;
 var Server = require('mongodb').Server;
 var Base = require('db-migrate-base');
