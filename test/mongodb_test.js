@@ -18,7 +18,6 @@ internals.interfaces = {
 };
 internals.migrationTable = "migrations";
 
-var dbName = config.database;
 var db;
 
 vows

@@ -1,19 +1,14 @@
 var util = require('util');
-var moment = require('moment');
 var MongoClient = require('mongodb').MongoClient;
-var Server = require('mongodb').Server;
 var Base = require('db-migrate-base');
 var Promise = require('bluebird');
 var log;
-var type;
-var fs = require('fs');
 
 var MongodbDriver = Base.extend({
 
-  init: function(connection, internals, mongoString, options) {
+  init: function(db, internals, options) {
     this._super(internals);
-    this.connection = connection;
-    this.connectionString = mongoString;
+    this.db = db;
     this.options = options;
   },
 
@@ -292,81 +287,63 @@ var MongodbDriver = Base.extend({
         return (err ? reject(err) : resolve(data));
       };
 
-      // Get a connection to mongo
-      this.connection.connect(this.connectionString, this.options, function(err, db) {
+      const db = this.db;
 
-        if(err) {
-          return prCB(err);
-        }
-
-        // Callback function to return mongo records
-        var callbackFunction = function(err, data) {
-
-          if(err) {
-            prCB(err);
+      // Depending on the command, we need to use different mongo methods
+      switch(command) {
+        case 'find':
+          if(sort) {
+            db.collection(collection)[command](options.query).sort(sort).toArray(prCB);
           }
-
-          prCB(null, data);
-          db.close();
-        };
-
-        // Depending on the command, we need to use different mongo methods
-        switch(command) {
-          case 'find':
-
-            if(sort) {
-              db.collection(collection)[command](options.query).sort(sort).toArray(callbackFunction);
-            }
-            else {
-              db.collection(collection)[command](options).toArray(callbackFunction);
-            }
-            break;
-          case 'renameCollection':
-            db[command](collection, options.newCollection, callbackFunction);
-            break;
-          case 'createIndex':
-            db[command](collection, options.columns, {name: options.indexName, unique: options.unique}, callbackFunction);
-            break;
-          case 'dropIndex':
-            db.collection(collection)[command](options.indexName, callbackFunction);
-            break;
-          case 'insert':
-            // options is the records to insert in this case
-            if(util.isArray(options))
-              db.collection(collection).insertMany(options, {}, callbackFunction);
-            else
-              db.collection(collection).insertOne(options, {}, callbackFunction);
-            break;
-          case 'remove':
-            // options is the records to insert in this case
-            if(util.isArray(options))
-              db.collection(collection).deleteMany(options, callbackFunction);
-            else
-              db.collection(collection).deleteOne(options, callbackFunction);
-            break;
-          case 'collections':
-            db.collections(callbackFunction);
-            break;
-          case 'indexInformation':
-            db.indexInformation(collection, callbackFunction);
-            break;
-          case 'dropDatabase':
-            db.dropDatabase(callbackFunction);
-            break;
-          case 'update':
-            db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
-            break;
-          case 'updateMany':
-            db.collection(collection)[command](options.query, options.update, options.options, callbackFunction);
-            break;
-          case 'getDbInstance':
-            prCB(null, db); // When the user wants to get the DB instance we need to return the promise callback, so the DB connection is not automatically closed
-            break;
-          default:
-            db[command](collection, callbackFunction);
-            break;
-        }
-      });
+          else {
+            db.collection(collection)[command](options).toArray(prCB);
+          }
+          break;
+        case 'renameCollection':
+          db[command](collection, options.newCollection, prCB);
+          break;
+        case 'createIndex':
+          db[command](collection, options.columns, {name: options.indexName, unique: options.unique}, prCB);
+          break;
+        case 'dropIndex':
+          db.collection(collection)[command](options.indexName, prCB);
+          break;
+        case 'insert':
+          // options is the records to insert in this case
+          if(util.isArray(options))
+            db.collection(collection).insertMany(options, {}, prCB);
+          else
+            db.collection(collection).insertOne(options, {}, prCB);
+          break;
+        case 'remove':
+          // options is the records to insert in this case
+          if(util.isArray(options))
+            db.collection(collection).deleteMany(options, prCB);
+          else
+            db.collection(collection).deleteOne(options, prCB);
+          break;
+        case 'collections':
+          db.collections(prCB);
+          break;
+        case 'indexInformation':
+          db.indexInformation(collection, prCB);
+          break;
+        case 'dropDatabase':
+          db.dropDatabase(prCB);
+          break;
+        case 'update':
+          db.collection(collection)[command](options.query, options.update, options.options, prCB);
+          break;
+        case 'updateMany':
+          db.collection(collection)[command](options.query, options.update, options.options, prCB);
+          break;
+        case 'getDbInstance':
+          prCB(null, db);
+          break;
+        default:
+          db[command](collection, prCB);
+          break;
+      }
     }.bind(this)).nodeify(callback);
   },
 
@@ -436,6 +413,8 @@ var MongodbDriver = Base.extend({
    * Closes the connection to mongodb
    */
   close: function(callback) {
+    // close the connectionPool
+    this.connectionPool.close();
     return Promise.resolve().nodeify(callback);
   },
 
@@ -485,7 +464,6 @@ function parseObjects( config, port, length ) {
  * @param callback  - The callback to call with a MongodbDriver object
  */
 exports.connect = function(config, intern, callback) {
-  var db;
   var port;
   var host;
 
@@ -557,7 +535,12 @@ exports.connect = function(config, intern, callback) {
     config.options.sslCA = Buffer.from(config.options.sslCA);
   }
 
-  db = config.db || new MongoClient();
+  // create a connection pool
+  const connectionPool = config.connectionPool || new MongoClient(mongoString, config.options);
+  const db = connectionPool.connect((err, mongoClient) => {
+    if (err) return callback(err, null);
 
-  callback(null, new MongodbDriver(db, intern, mongoString, config.options));
+    const db = mongoClient.db();
+    callback(null, new MongodbDriver(db, intern, config.options));
+  });
 };
