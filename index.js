@@ -6,9 +6,10 @@ var log;
 
 var MongodbDriver = Base.extend({
 
-  init: function(db, internals, options) {
+  init: function(mongoClient, internals, options) {
     this._super(internals);
-    this.db = db;
+    this.mongoClient = mongoClient;
+    this.db = mongoClient.db();
     this.options = options;
   },
 
@@ -414,7 +415,7 @@ var MongodbDriver = Base.extend({
    */
   close: function(callback) {
     // close the connectionPool
-    this.connectionPool.close();
+    this.mongoClient.close();
     return Promise.resolve().nodeify(callback);
   },
 
@@ -540,7 +541,6 @@ exports.connect = function(config, intern, callback) {
   const db = connectionPool.connect((err, mongoClient) => {
     if (err) return callback(err, null);
 
-    const db = mongoClient.db();
-    callback(null, new MongodbDriver(db, intern, config.options));
+    callback(null, new MongodbDriver(mongoClient, intern, config.options));
   });
 };
