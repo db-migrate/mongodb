@@ -537,7 +537,10 @@ exports.connect = function(config, intern, callback) {
   }
 
   // create a connection pool
-  const connectionPool = config.connectionPool || new MongoClient(mongoString, config.options);
+  const connectionPool = config.connectionPool || new MongoClient(mongoString, {
+    useNewUrlParser: true, 
+    ...config.options
+  });
   const db = connectionPool.connect((err, mongoClient) => {
     if (err) return callback(err, null);
 
