@@ -296,8 +296,9 @@ var MongodbDriver = Base.extend({
           prCB(err);
         }
 
-        // New in Mongo 3 -- do we need database name here?
-        const db = mongoClient.db('db_migrate_test');
+        // New in Mongo 3
+        // Uses database name from connection string
+        const db = mongoClient.db();
 
         // Callback function to return mongo records
         var callbackFunction = function(err, data) {
