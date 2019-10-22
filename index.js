@@ -290,7 +290,7 @@ var MongodbDriver = Base.extend({
       };
 
       // Get a connection to mongo
-      this.connection.connect(this.connectionString, function(err, db) {
+      this.connection.connect(function(err, db) {
 
         if(err) {
           prCB(err);
@@ -551,6 +551,6 @@ exports.connect = function(config, intern, callback) {
   }
 
 
-  db = config.db || new MongoClient(new Server(host, port));
+  db = config.db || new MongoClient(mongoString, {useNewUrlParser: true, useUnifiedTopology: true});
   callback(null, new MongodbDriver(db, intern, mongoString));
 };
