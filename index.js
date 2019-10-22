@@ -1,6 +1,5 @@
 var util = require('util');
 var MongoClient = require('mongodb').MongoClient;
-var Server = require('mongodb').Server;
 var Base = require('db-migrate-base');
 var Promise = require('bluebird');
 var log;
