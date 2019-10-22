@@ -47,7 +47,7 @@ vows
 
       "has table metadata": {
         topic: function() {
-          db._getCollectionNames(this.callback);
+          db._getCollectionNames(this.callback); // With mongoClient.close(false), server selection timed out error
         },
 
         "containing the event table": function(err, tables) {

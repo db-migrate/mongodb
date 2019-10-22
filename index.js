@@ -10,7 +10,7 @@ var MongodbDriver = Base.extend({
 
   init: function(connection, internals, mongoString) {
     this._super(internals);
-    this.connection = connection;
+    this.connection = connection; // needs to be MongoClient
     this.connectionString = mongoString;
   },
 
@@ -290,11 +290,14 @@ var MongodbDriver = Base.extend({
       };
 
       // Get a connection to mongo
-      this.connection.connect(function(err, db) {
+      this.connection.connect(function(err, mongoClient) {
 
         if(err) {
           prCB(err);
         }
+
+        // New in Mongo 3 -- do we need database name here?
+        const db = mongoClient.db('db_migrate_test');
 
         // Callback function to return mongo records
         var callbackFunction = function(err, data) {
@@ -303,8 +306,12 @@ var MongodbDriver = Base.extend({
             prCB(err);
           }
 
+          // with close(force: true), get db destroyed error
+          // with close(force: false), times out for .collecions
+          // without close, hangs
+          // mongoClient.close(true, function() {
           prCB(null, data);
-          db.close();
+          // });
         };
 
         // Depending on the command, we need to use different mongo methods
@@ -551,6 +558,6 @@ exports.connect = function(config, intern, callback) {
   }
 
 
-  db = config.db || new MongoClient(mongoString, {useNewUrlParser: true, useUnifiedTopology: true});
+  db = config.db || new MongoClient(mongoString, {useNewUrlParser: true});
   callback(null, new MongodbDriver(db, intern, mongoString));
 };
