@@ -4,7 +4,7 @@
   "description": "mongodb driver for db-migrate",
   "main": "index.js",
   "scripts": {
-    "test": "node node_modules/.bin/vows"
+    "test": "node ./test/mongodb_lab_test.js"
   },
   "repository": {
     "type": "git",
@@ -25,13 +25,14 @@
   },
   "homepage": "https://github.com/db-migrate/mongodb",
   "dependencies": {
+    "@hapi/code": "^8.0.1",
+    "@hapi/lab": "^22.0.3",
     "bluebird": "^3.5.0",
     "db-migrate-base": "^1.3.3",
     "mongodb": "^3.3.3"
   },
   "devDependencies": {
     "db-meta": "^0.4.1",
-    "db-migrate-shared": "^1.1.2",
-    "vows": "0.8.3"
+    "db-migrate-shared": "^1.1.2"
   }
 }

@@ -291,6 +291,8 @@ var MongodbDriver = Base.extend({
       // Get a connection to mongo
       this.connection.connect(function(err, mongoClient) {
 
+        debugger;
+
         if(err) {
           prCB(err);
         }
@@ -298,20 +300,20 @@ var MongodbDriver = Base.extend({
         // New in Mongo 3
         // Uses database name from connection string
         const db = mongoClient.db();
+        console.log('isConnected 1: ', mongoClient.isConnected());
 
         // Callback function to return mongo records
-        var callbackFunction = function(err, data) {
-
+        var callbackFunction = async function(err, data) {
           if(err) {
             prCB(err);
           }
 
-          // with close(force: true), get db destroyed error
-          // with close(force: false), times out for .collecions
-          // without close, hangs
-          // mongoClient.close(true, function() {
-          prCB(null, data);
-          // });
+          console.log('isConnected 2: ', mongoClient.isConnected());
+
+          mongoClient.close(true, () => {
+            console.log('isConnected 3: ', mongoClient.isConnected());
+            prCB(null, data)
+          });
         };
 
         // Depending on the command, we need to use different mongo methods
