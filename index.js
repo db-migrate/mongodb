@@ -290,30 +290,20 @@ var MongodbDriver = Base.extend({
 
       // Get a connection to mongo
       this.connection.connect(function(err, mongoClient) {
-
-        debugger;
-
+        console.log('Connection to', collection, 'executing', command);
         if(err) {
           prCB(err);
         }
 
-        // New in Mongo 3
-        // Uses database name from connection string
-        const db = mongoClient.db();
-        console.log('isConnected 1: ', mongoClient.isConnected());
+        const db = mongoClient.db(collection);
 
-        // Callback function to return mongo records
         var callbackFunction = async function(err, data) {
           if(err) {
             prCB(err);
           }
 
-          console.log('isConnected 2: ', mongoClient.isConnected());
-
-          mongoClient.close(true, () => {
-            console.log('isConnected 3: ', mongoClient.isConnected());
-            prCB(null, data)
-          });
+          mongoClient.close();
+          prCB(null, data)
         };
 
         // Depending on the command, we need to use different mongo methods
@@ -374,6 +364,8 @@ var MongodbDriver = Base.extend({
         }
       });
     }.bind(this)).nodeify(callback);
+
+
   },
 
   _makeParamArgs: function(args) {
@@ -442,7 +434,11 @@ var MongodbDriver = Base.extend({
    * Closes the connection to mongodb
    */
   close: function(callback) {
-    return Promise.resolve().nodeify(callback);
+    if(this.connection.isConnected) {
+      return Promise.resolve().then(function() {
+        this.connection.close(true);
+      }.bind(this)).nodeify(callback);
+    }
   },
 
   buildWhereClause: function() {
@@ -559,7 +555,6 @@ exports.connect = function(config, intern, callback) {
       mongoString += '?' + extraParams.join('&');
   }
 
-
-  db = config.db || new MongoClient(mongoString, {useNewUrlParser: true});
+  db = config.db || new MongoClient(mongoString, { useNewUrlParser: true, useUnifiedTopology: true });
   callback(null, new MongodbDriver(db, intern, mongoString));
 };

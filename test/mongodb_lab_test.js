@@ -8,7 +8,7 @@ var driver = require("../");
 var log = require("db-migrate-shared").log;
 
 const { expect } = Code;
-const { after, before, describe, it } = exports.lab = Lab.script();
+const { after, afterEach, before, beforeEach, describe, it } = exports.lab = Lab.script();
 
 var internals = {};
 internals.mod = {
@@ -25,19 +25,30 @@ var dbName = config.database;
 var db;
 
 describe('mongodb', () => {
-    before(() => {
+    beforeEach(() => {
         driver.connect(config, internals, (_err, client) => {
             db = client;
         });
     });
 
-    after(() => {
+    afterEach(() => {
+      //db.close();
     });
 
-    it('has table metadata containing the event table', { timeout: 100000 }, async () => {
+    it('has table metadata containing the event table', async () => {
         await db.createCollection("event");
         const tables = await db._getCollectionNames();
 
         expect(tables.map(t => t.collectionName)).to.include("event");
+    });
+
+    describe('dropCollection', () => {
+      it.skip('deletes the collection', async () => {
+        await db.createCollection("event");
+        await db.dropCollection("event");
+        const tables = await db._getCollectionNames();
+
+        expect(tables.map(t => t.collectionName)).not.to.include("event");
+      });
     });
 });
