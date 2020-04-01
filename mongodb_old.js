@@ -2,7 +2,7 @@ var vows = require("vows");
 var assert = require("assert");
 var dbmeta = require("db-meta");
 var dataType = require("db-migrate-shared").dataType;
-var driver = require("../");
+var driver = require("..");
 var log = require("db-migrate-shared").log;
 
 var config = require("./db.config.json").mongodb;
