@@ -334,12 +334,11 @@ var MongodbDriver = Base.extend({
             else
               db.collection(collection).insertOne(options, {}, callbackFunction);
             break;
+          case 'removeMany':
+            db.collection(collection).deleteMany(options, callbackFunction);
+            break;
           case 'remove':
-            // options is the records to insert in this case
-            if(util.isArray(options))
-              db.collection(collection).deleteMany(options, callbackFunction);
-            else
-              db.collection(collection).deleteOne(options, callbackFunction);
+            db.collection(collection).deleteOne(options, callbackFunction);
             break;
           case 'collections':
             db.collections(callbackFunction);
