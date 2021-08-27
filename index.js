@@ -211,7 +211,7 @@ var MongodbDriver = Base.extend({
     return this._run('insert', this.internals.seedTable, {name: name, run_on: new Date()})
       .nodeify(callback);
   },
-  
+
   /**
    * Returns the DB instance so custom updates can be made.
    * NOTE: This method exceptionally does not call close() on the database driver when the promise resolves. So the getDbInstance method caller
@@ -340,6 +340,14 @@ var MongodbDriver = Base.extend({
           break;
         case 'getDbInstance':
           prCB(null, db);
+          break;
+        case 'createCollection':
+          db.createCollection(collection, { strict: true }, err => {
+            if (err && /Collection.*already exists/.test(err.message)) {
+              return prCB();
+            }
+            return prCB(err);
+          });
           break;
         default:
           db[command](collection, prCB);
@@ -538,7 +546,7 @@ exports.connect = function(config, intern, callback) {
 
   // create a connection pool
   const connectionPool = config.connectionPool || new MongoClient(mongoString, {
-    useNewUrlParser: true, 
+    useNewUrlParser: true,
     ...config.options
   });
   const db = connectionPool.connect((err, mongoClient) => {
