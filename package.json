@@ -1,10 +1,10 @@
 {
   "name": "db-migrate-mongodb",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "mongodb driver for db-migrate",
   "main": "index.js",
   "scripts": {
-    "test": "node node_modules/.bin/vows"
+    "test": "vows"
   },
   "repository": {
     "type": "git",
@@ -27,11 +27,11 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "db-migrate-base": "^1.3.3",
-    "mongodb": "^3.3.3"
+    "mongodb": "^4.11.0"
   },
   "devDependencies": {
     "db-meta": "^0.4.1",
     "db-migrate-shared": "^1.1.2",
-    "vows": "0.8.0"
+    "vows": "^0.8.3"
   }
 }
