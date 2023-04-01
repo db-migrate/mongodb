@@ -441,9 +441,18 @@ var MongodbDriver = Base.extend({
     return Promise.reject('There is no NoSQL implementation yet!');
   },
 
-  update: function() {
-
-    return Promise.reject('There is no NoSQL implementation yet!');
+  /**
+   * Update a record(s) of a collection
+   * @param collectionName  - The collection to update
+   * @param query           - The record(s) to update
+   * @param update          - The update
+   * @param options
+   * @param callback
+     * @returns {*}
+     */
+  update: function(collectionName, query, update, options, callback) {
+    return this._run('update', collectionName, {query: query, update: update, options: options})
+      .nodeify(callback);
   }
 });
 
